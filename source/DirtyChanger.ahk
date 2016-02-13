@@ -48,7 +48,8 @@ Gui, 2: Add, Text, vTickText x+15 y+-20, Image changed
 ;Gui, 2: Add, Picture, vTickImage x130 y+20, %folder%\%current%.webp
 Gui, 2: Add, pic, gOnImageClick vTickImage x100 y+20 w160 h90, %ranImg%
 
-Gui, 2: add, button, y+20 x+-90 w75 h23 gMainOk, OK
+Gui, 2: add, button, y+20 x25 w75 h23 gMainRestore, Restore
+Gui, 2: add, button, y+-23 x+90 w75 h23 gMainOk, OK
 Gui, 2: add, button, x+5 y+-23 w75 h23 gMainCancel, Cancel
 
 GuiControl, 2: Hide, Tick
@@ -181,14 +182,12 @@ return
 
 continue:
 img = %folder%\%current%.webp
-copy = %A_ScriptDir%\bin\backups\%current%.webp
 FileSelectFile, SelectedFile, 3, , Pick an image,Images(*.jpg;*.png)
 WinWaitClose Pick an image
-IfNotExist %copy%
-{
-	FileCreateDir, %A_ScriptDir%\bin\backups\
-	FileCopy, %img%, %copy%
-}
+
+IfNotExist, %A_ScriptDir%\backups\%current%.webp
+	FileCopy, %img%, %A_ScriptDir%\backups\%current%.webp
+
 FileCopy, %SelectedFile%, %img%, 1
 return
 
@@ -333,6 +332,24 @@ WinWaitClose Select Dirty Bomb directory
 GuiControl, 3:Text, EditConfirm, %EditConfirm%
 return
 
+MainRestore:
+Loop %A_ScriptDir%\backups\*.*, 0, 1
+	Goto truee
+MsgBox,, Alert, Nothing changed yet
+Return
+
+truee:
+MsgBox, 4, Restore,Do you want to restore original images?
+IfMsgBox Yes
+{
+	Loop %A_ScriptDir%\backups\*
+	{
+		FileMove, %A_LoopFileFullPath%, %folder%\%A_LoopFileName%, 1
+	}
+	MsgBox,,Restore, All images restored
+}
+return
+
 MainOk:
 Gui,2: Submit
 FileDelete %A_ScriptDir%\bin\from.txt
@@ -356,6 +373,9 @@ If !EditFolder
 FileRead, folder, %A_ScriptDir%\bin\path.txt
 folder = %folder%\ShooterGame\Content\WebAssets\images\merc-backgrounds
 img = %folder%\%current%.webp
+
+IfNotExist, %A_ScriptDir%\backups\%current%.webp
+	FileCopy, %img%, %A_ScriptDir%\backups\%current%.webp
 
 Loop, %EditFolder%\*
 {
@@ -424,6 +444,9 @@ Else
 }
 Gui, destroy
 return
+
+3GuiClose:
+ExitApp
 
 2GuiClose:
 exitapp

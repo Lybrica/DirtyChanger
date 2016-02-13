@@ -69,6 +69,8 @@ Loop, %from%\*
 	}
 }
 
+IfNotExist, %A_ScriptDir%\backups\%current%.webp
+	FileCopy, %img%, %A_ScriptDir%\backups\%current%.webp
 FileCopy, %ranFile%, %img%, 1
 justLaunch:
 Run steam://rungameid/333930
